@@ -1,3 +1,23 @@
+export type ActiveView = "landing" | "dashboard" | "chat" | "analytics" | "pitch-deck";
+
+export interface ProjectItem {
+  id: string;
+  title: string;
+  industry: string;
+  score: number;
+  location: string;
+  status: "Completed" | "In Progress" | "Draft";
+  updatedAt: string;
+}
+
+export interface TaskItem {
+  id: string;
+  title: string;
+  dueDate: string;
+  completed: boolean;
+  category: "Validation" | "MVP" | "Marketing" | "Funding";
+}
+
 export interface FounderProfileInput {
   name?: string;
   location?: string;
