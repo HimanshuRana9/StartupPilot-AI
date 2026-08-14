@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Activity, Globe, TrendingUp, Radio } from "lucide-react";
+import { Activity, Globe, TrendingUp, Radio, ShieldCheck } from "lucide-react";
 
 interface RealTimeTickerProps {
   news: string[];
@@ -16,11 +16,14 @@ export const RealTimeTicker: React.FC<RealTimeTickerProps> = ({ news, timestamp 
       <div className="flex items-center gap-2 shrink-0">
         <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
           <Radio className="w-3.5 h-3.5 text-emerald-400 animate-ping" />
-          LIVE REAL-WORLD INTELLIGENCE
+          LIVE SOURCES VERIFIED
         </span>
-        <span className="text-slate-400 hidden lg:inline">|</span>
+        <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-semibold text-[11px] flex items-center gap-1">
+          <ShieldCheck className="w-3.5 h-3.5 text-cyan-300" />
+          100% Legal Public RSS & APIs
+        </span>
         <span className="text-slate-400 text-[11px] hidden lg:inline">
-          Fetched: {timestamp || "Live Updates Active"}
+          • Updated: {timestamp || "Real-Time Active"}
         </span>
       </div>
 

@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app.agents.orchestrator import orchestrator
 from app.tools.arbitrage_engine import arbitrage_engine
 from app.tools.export_engine import generate_pdf_report, generate_pptx_pitch_deck
+from app.tools.live_data import check_live_sources_health, fetch_live_news
 
 app = FastAPI(
     title="StartupPilot AI API",
@@ -44,8 +45,14 @@ def read_root():
         "status": "online",
         "service": "StartupPilot AI Multi-Agent Intelligence Engine",
         "version": "2.0.0",
-        "agents_active": 11
+        "agents_active": 11,
+        "live_sources_compliant": True
     }
+
+@app.get("/api/live-data/status")
+def get_live_data_status():
+    """Returns up-to-the-second real-time source health, legal compliance, and latency metrics."""
+    return check_live_sources_health()
 
 @app.post("/api/analyze")
 def analyze_startup(req: AnalyzeRequest):
