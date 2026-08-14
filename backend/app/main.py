@@ -1,6 +1,6 @@
 import os
 import io
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,6 +9,7 @@ from app.agents.orchestrator import orchestrator
 from app.tools.arbitrage_engine import arbitrage_engine
 from app.tools.export_engine import generate_pdf_report, generate_pptx_pitch_deck
 from app.tools.live_data import check_live_sources_health, fetch_live_news
+from app.services.voice_assistant import process_conversational_voice
 
 app = FastAPI(
     title="StartupPilot AI API",
@@ -38,6 +39,7 @@ class ArbitrageCompareRequest(BaseModel):
 
 class VoiceCommandRequest(BaseModel):
     command: str
+    history: Optional[List[Dict[str, Any]]] = None
 
 @app.get("/")
 def read_root():
@@ -46,7 +48,8 @@ def read_root():
         "service": "StartupPilot AI Multi-Agent Intelligence Engine",
         "version": "2.0.0",
         "agents_active": 11,
-        "live_sources_compliant": True
+        "live_sources_compliant": True,
+        "voice_engine": "Gemini Conversational Agent"
     }
 
 @app.get("/api/live-data/status")
@@ -85,26 +88,19 @@ def compare_locations(req: ArbitrageCompareRequest):
 
 @app.post("/api/voice-command")
 @app.post("/api/voice")
-def process_voice_command(req: VoiceCommandRequest):
-    """Processes interactive voice commands and returns spoken audio text & action intent."""
-    cmd = req.command.lower().strip()
-    
-    if "compare" in cmd or "noida" in cmd or "mumbai" in cmd or "bengaluru" in cmd:
-        res = arbitrage_engine.compare_locations("Greater Noida", "Delhi")
-        reply = (
-            f"Comparing Greater Noida and Delhi. Sourcing in Greater Noida costs ₹{res['source_costs']['total_per_unit']:.2f} "
-            f"per unit, compared to ₹{res['target_costs']['total_per_unit']:.2f} in Delhi, yielding a "
-            f"₹{res['savings_per_unit']:.2f} unit cost advantage."
+def process_voice_endpoint(req: VoiceCommandRequest):
+    """
+    Conversational Gemini AI Voice Assistant Endpoint.
+    Understands natural spoken language, context history, Q&A, and triggers tool execution.
+    """
+    try:
+        res = process_conversational_voice(
+            user_query=req.command,
+            conversation_history=req.history
         )
-        return {"spoken_reply": reply, "action_type": "ARBITRAGE", "data": res}
-    
-    elif "pitch" in cmd or "deck" in cmd or "presentation" in cmd:
-        reply = "Preparing your 8-slide investor pitch deck with financial projections and market size metrics."
-        return {"spoken_reply": reply, "action_type": "PITCH_DECK"}
-    
-    else:
-        reply = f"Analyzing your startup idea: '{req.command}'. Triggering 11 specialized agents now."
-        return {"spoken_reply": reply, "action_type": "ANALYZE"}
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Voice Assistant Error: {str(e)}")
 
 @app.post("/api/export/pdf")
 def export_pdf(report: Dict[str, Any]):
