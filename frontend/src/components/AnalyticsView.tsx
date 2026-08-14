@@ -18,16 +18,17 @@ interface AnalyticsViewProps {
 export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ report }) => {
   const chartData = [
     { name: "Validation", score: report ? report.idea_validation.innovation_index * 10 : 88 },
-    { name: "Market Size", score: 92 },
+    { name: "Market Size", score: report ? report.market_research.market_demand_score * 10 : 92 },
     { name: "Competitors", score: 78 },
-    { name: "Founder Match", score: report ? report.founder_feasibility.founder_readiness_score * 10 : 85 },
-    { name: "Funding", score: report ? (report.funding_advisor.bootstrap_feasible ? 90 : 70) : 85 },
+    { name: "Execution", score: report ? Math.round(report.overall_readiness_score) : 85 },
+    { name: "Location", score: report ? report.regional_arbitrage.arbitrage_summary.confidence_score : 91 },
   ];
 
   const pieData = [
-    { name: "MVP Software & Tech", value: 35, color: "#6366f1" },
-    { name: "Regional Warehouse & Ops", value: 40, color: "#06b6d4" },
-    { name: "Digital Growth Ads", value: 25, color: "#a855f7" },
+    { name: "Product Mfg & Raw Material", value: 40, color: "#6366f1" },
+    { name: "Regional Warehouse & Logistics", value: 25, color: "#06b6d4" },
+    { name: "Marketing & Growth Ads", value: 20, color: "#a855f7" },
+    { name: "Working Capital Reserve", value: 15, color: "#10b981" },
   ];
 
   return (
@@ -37,7 +38,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ report }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl glass-card border border-indigo-500/20">
         <div>
           <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest block mb-1">
-            Deep Business Intelligence
+            Deep Business Intelligence & Evidence Engine
           </span>
           <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
             Market Analytics & Competitive Intelligence
@@ -48,7 +49,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ report }) => {
         </div>
       </div>
 
-      {/* Visual Analytics Charts Grid (Image 7 Style) */}
+      {/* Visual Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Readiness Bar Chart */}
@@ -86,7 +87,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ report }) => {
               <PieChart className="w-5 h-5 text-purple-400" />
               Capital Budget Allocation
             </h3>
-            <span className="text-xs text-slate-400">Estimated Cost Share</span>
+            <span className="text-xs text-slate-400 font-medium">Use of Seed Capital</span>
           </div>
 
           <div className="h-64 w-full flex items-center justify-center">
@@ -117,7 +118,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ report }) => {
       {/* Human-Level Regional Supply Chain & Price Arbitrage Card */}
       {report && <ArbitrageCard arbitrage={report.regional_arbitrage} />}
 
-      {/* Competitor Battlecards Table (Image 8 Style: Kompyte / Competitor Intelligence) */}
+      {/* Competitor Battlecards Table */}
       <div className="p-6 rounded-3xl glass-card border border-indigo-500/20 space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
           <div>

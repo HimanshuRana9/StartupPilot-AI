@@ -12,11 +12,11 @@ interface PitchDeckStudioViewProps {
 }
 
 export const PitchDeckStudioView: React.FC<PitchDeckStudioViewProps> = ({ report }) => {
-  const defaultSlides: PitchSlide[] = report?.investor_readiness.deck_slides || [
+  const defaultSlides: PitchSlide[] = report?.investor_readiness?.pitch_slides || [
     { slide_number: 1, title: "The Problem", bullet_points: ["High operational overhead in traditional business setup", "Lack of real-time regional cost arbitrage insights"], key_takeaway: "Clear market pain point for automated AI execution." },
     { slide_number: 2, title: "The Solution", bullet_points: ["Autonomous Multi-Agent AI platform for founders", "Human-level supply chain price arbitrage (Noida vs Delhi)"], key_takeaway: "Rapid, cost-effective startup execution." },
-    { slide_number: 3, title: "Market Opportunity", bullet_points: ["$8.4B+ Global Market with 21.4% CAGR", "Immediate focus on Tier-1 & Tier-2 regional hubs"], key_takeaway: "High-growth sector with expanding purchasing power." },
-    { slide_number: 4, title: "Business & Revenue Model", bullet_points: ["Freemium Core + Pro Subscription (₹999/mo)", "Enterprise regional licensing"], key_takeaway: "High contribution margins & recurring cash flow." },
+    { slide_number: 3, title: "Market Opportunity", bullet_points: ["$14.8B Global Market with 21.4% CAGR", "Immediate focus on Tier-1 & Tier-2 regional hubs"], key_takeaway: "High-growth sector with expanding purchasing power." },
+    { slide_number: 4, title: "Business & Revenue Model", bullet_points: ["Unit ARPU: ₹250 | COGS: ₹110", "Gross Margin: 56.0%"], key_takeaway: "High contribution margins & recurring cash flow." },
   ];
 
   const [activeSlideIdx, setActiveSlideIdx] = useState(0);
@@ -84,7 +84,7 @@ export const PitchDeckStudioView: React.FC<PitchDeckStudioViewProps> = ({ report
               <Sparkles className="w-4 h-4 text-amber-300" />
             </h1>
             <p className="text-xs text-slate-400">
-              Auto-Generated Presentation Deck | Readiness Score: {report ? report.investor_readiness.investor_readiness_score : "88"}/100
+              Auto-Generated Presentation Deck | Readiness Score: {report ? Math.round(report.overall_readiness_score) : "88"}/100
             </p>
           </div>
         </div>

@@ -9,7 +9,7 @@ interface PitchDeckViewerProps {
 }
 
 export const PitchDeckViewer: React.FC<PitchDeckViewerProps> = ({ report }) => {
-  const slides = report.investor_readiness.deck_slides || [];
+  const slides = report.investor_readiness.pitch_slides || [];
   const [currentSlideIdx, setCurrentSlideIdx] = useState(0);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isExportingPptx, setIsExportingPptx] = useState(false);
@@ -85,7 +85,7 @@ export const PitchDeckViewer: React.FC<PitchDeckViewerProps> = ({ report }) => {
             </h3>
           </div>
           <p className="text-xs text-slate-400">
-            Auto-Generated 8-Slide Pitch Deck | Investor Readiness Score: {report.investor_readiness.investor_readiness_score}/100
+            Auto-Generated 8-Slide Pitch Deck | Investor Readiness Score: {Math.round(report.overall_readiness_score)}/100
           </p>
         </div>
 
