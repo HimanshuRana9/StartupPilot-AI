@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Mic, MicOff, Volume2, X, Sparkles, Bot, CheckCircle2 } from "lucide-react";
+import { Mic, MicOff, Volume2, X, Sparkles, Bot, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface VoiceAssistantProps {
   isOpen: boolean;
@@ -17,10 +17,11 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [assistantReply, setAssistantReply] = useState(
-    "Hello! I am your AI Startup Mentor. Click the microphone and speak your startup idea or query!"
+    "Hello! I am your AI Startup Mentor. Click the microphone to speak, or select a quick voice command below!"
   );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
+  const [micSupported, setMicSupported] = useState(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -38,11 +39,23 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
           setTranscript(text);
         };
 
+        reco.onerror = (event: any) => {
+          console.warn("Speech error:", event.error);
+          setIsListening(false);
+          if (event.error === "not-allowed") {
+            setAssistantReply("Microphone access blocked. Please enable mic permissions in your browser URL bar.");
+          } else if (event.error === "no-speech") {
+            setAssistantReply("No speech detected. Please click the mic button and try speaking again.");
+          }
+        };
+
         reco.onend = () => {
           setIsListening(false);
         };
 
         setRecognition(reco);
+      } else {
+        setMicSupported(false);
       }
     }
   }, []);
@@ -61,7 +74,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
 
   const toggleListening = () => {
     if (!recognition) {
-      alert("Speech recognition is not supported in this browser. Please try Google Chrome or MS Edge.");
+      setAssistantReply("Speech recognition is not supported in this browser. You can type or select a command below.");
       return;
     }
 
@@ -69,23 +82,29 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
       recognition.stop();
       setIsListening(false);
     } else {
-      setTranscript("");
-      recognition.start();
-      setIsListening(true);
+      try {
+        setTranscript("");
+        setAssistantReply("Listening... Speak your startup idea now!");
+        recognition.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Mic start error:", err);
+        setIsListening(false);
+      }
     }
   };
 
-  const handleSendVoiceCommand = async () => {
-    if (!transcript.trim()) return;
+  const handleSendVoiceCommand = async (commandOverride?: string) => {
+    const textToSend = commandOverride || transcript;
+    if (!textToSend.trim()) return;
 
-    const userText = transcript;
-    setAssistantReply(`Processing voice command: "${userText}"...`);
+    setAssistantReply(`Executing voice command: "${textToSend}"...`);
 
     try {
       const res = await fetch("http://127.0.0.1:8000/api/voice-command", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: userText }),
+        body: JSON.stringify({ command: textToSend }),
       });
       const data = await res.json();
 
@@ -93,17 +112,23 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
       speakText(data.spoken_reply);
 
       if (data.action_type === "ANALYZE") {
-        onRunAnalysis(userText);
-        setTimeout(() => onClose(), 2500);
+        onRunAnalysis(textToSend);
+        setTimeout(() => onClose(), 2000);
       }
     } catch (e) {
-      const fallbackMsg = `Analyzing startup idea: ${userText}`;
+      const fallbackMsg = `Analyzing startup idea: ${textToSend}`;
       setAssistantReply(fallbackMsg);
       speakText(fallbackMsg);
-      onRunAnalysis(userText);
-      setTimeout(() => onClose(), 2500);
+      onRunAnalysis(textToSend);
+      setTimeout(() => onClose(), 2000);
     }
   };
+
+  const quickCommands = [
+    "I want to open a Cafe in Delhi",
+    "Candy manufacturing in Noida & retailing in Delhi",
+    "AI Fitness App for College Students",
+  ];
 
   if (!isOpen) return null;
 
@@ -122,7 +147,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
                 Voice Assistant Agent
                 <Sparkles className="w-4 h-4 text-amber-300" />
               </h3>
-              <p className="text-xs text-slate-400">Hands-Free Interactive Voice Commands</p>
+              <p className="text-xs text-slate-400">Interactive Voice & Spoken Feedback Controls</p>
             </div>
           </div>
           <button
@@ -134,7 +159,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
         </div>
 
         {/* Visualizer Soundwave */}
-        <div className="py-8 flex flex-col items-center justify-center">
+        <div className="py-6 flex flex-col items-center justify-center">
           <div className="flex items-center justify-center gap-1.5 h-12 mb-4">
             <span className={`w-1.5 rounded-full bg-cyan-400 ${isListening || isSpeaking ? "animate-voice-bar-1" : "h-3"}`} />
             <span className={`w-1.5 rounded-full bg-indigo-400 ${isListening || isSpeaking ? "animate-voice-bar-2" : "h-5"}`} />
@@ -158,16 +183,41 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
             )}
           </button>
           <p className="mt-3 text-xs text-slate-400 font-medium">
-            {isListening ? "Listening... Speak your startup prompt" : "Click mic to start speaking"}
+            {isListening ? "Listening... Speak now" : "Click mic to speak voice command"}
           </p>
         </div>
 
-        {/* Live Speech Recognition Transcript Box */}
-        <div className="mb-4 p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
-          <span className="text-slate-500 block mb-1 font-semibold">YOUR VOICE INPUT:</span>
-          <p className="text-slate-200 min-h-[24px]">
-            {transcript || "Speak something like: 'Analyze candy business in Noida vs Delhi'..."}
-          </p>
+        {/* Quick Voice Command Chips */}
+        <div className="mb-4 space-y-1.5">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+            Quick Voice Commands:
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {quickCommands.map((cmd, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setTranscript(cmd);
+                  handleSendVoiceCommand(cmd);
+                }}
+                className="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-indigo-900/40 border border-slate-800 text-[11px] text-indigo-300 transition-colors"
+              >
+                "{cmd}"
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Editable Transcript Input Box */}
+        <div className="mb-4 p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs space-y-1">
+          <span className="text-slate-500 font-semibold block">VOICE TRANSCRIPT / PROMPT:</span>
+          <input
+            type="text"
+            value={transcript}
+            onChange={(e) => setTranscript(e.target.value)}
+            placeholder="Spoken text appears here, or type your prompt..."
+            className="w-full bg-transparent text-slate-100 focus:outline-none"
+          />
         </div>
 
         {/* Voice Assistant Speech Reply Box */}
@@ -176,10 +226,10 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
           <p className="text-indigo-200">{assistantReply}</p>
         </div>
 
-        {/* Actions */}
+        {/* Action Submit Button */}
         <div className="flex gap-3">
           <button
-            onClick={handleSendVoiceCommand}
+            onClick={() => handleSendVoiceCommand()}
             disabled={!transcript.trim()}
             className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white font-semibold text-sm transition-all shadow-md flex items-center justify-center gap-2"
           >
@@ -187,6 +237,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
             Submit Voice Command
           </button>
         </div>
+
       </div>
     </div>
   );

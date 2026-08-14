@@ -29,123 +29,148 @@ export interface FounderProfileInput {
   has_co_founder: boolean;
 }
 
+export interface EvidenceItem {
+  source: string;
+  type: string;
+  timestamp: string;
+}
+
+export interface FinalDecisionResult {
+  overall_readiness_score: number;
+  recommendation: "BUILD MVP" | "BOOTSTRAP & VALIDATE" | "PIVOT MODEL" | string;
+  recommendation_detail: string;
+  confidence_score: number;
+  best_operating_location: string;
+  unit_cost_advantage: string;
+  key_reasons: string[];
+  evidence_sources: EvidenceItem[];
+}
+
 export interface IdeaValidationResult {
-  score: number;
   problem_statement: string;
-  proposed_solution: string;
+  solution_concept: string;
   target_audience: string;
+  unique_value_prop: string;
   innovation_index: number;
-  feasibility_difficulty: string;
-  primary_risks: string[];
-  initial_recommendation: string;
+  execution_complexity: string;
+  key_differentiators: string[];
 }
 
 export interface MarketResearchResult {
-  market_size_description: string;
-  cagr_growth_rate: string;
-  top_countries_or_regions: string[];
-  emerging_trends: string[];
-  live_news_highlights: string[];
+  tam: string;
+  sam: string;
+  som: string;
+  cagr_growth: string;
+  market_demand_score: number;
+  key_market_trends: string[];
+  live_news_references: string[];
 }
 
 export interface CompetitorItem {
   name: string;
   pricing_model: string;
+  rating: string;
   key_advantages: string[];
   vulnerabilities: string[];
 }
 
 export interface CompetitorAnalysisResult {
   competitors: CompetitorItem[];
-  market_gap: string;
-  differentiation_strategy: string;
+  market_gap_opportunity: string;
+  competitive_moat_strategy: string;
 }
 
-export interface RegionalArbitrageNode {
-  region_name: string;
-  type: string;
-  land_rent_level: string;
-  labor_cost_level: string;
-  raw_material_cost_estimate: string;
-  key_advantages: string[];
+export interface CustomerAnalysisResult {
+  primary_persona: string;
+  key_pain_points: string[];
+  buying_triggers: string[];
+  willingness_to_pay: string;
+  customer_acquisition_channels: string[];
+}
+
+export interface RegionalCostBreakdown {
+  manufacturing: number;
+  warehouse: number;
+  electricity: number;
+  labor: number;
+  tax_benefit: number;
+  logistics_freight: number;
+  total_per_unit: number;
+}
+
+export interface ArbitrageSummary {
+  source_city: string;
+  source_state: string;
+  target_city: string;
+  target_state: string;
+  distance_km: number;
+  source_costs: RegionalCostBreakdown;
+  target_costs: RegionalCostBreakdown;
+  savings_per_unit: number;
+  savings_percent: number;
+  estimated_profit_margin_boost: string;
+  confidence_score: number;
+  recommendation: string;
+  evidence: EvidenceItem[];
 }
 
 export interface ArbitrageOpportunity {
-  source_location: string;
-  target_location: string;
-  item_or_category: string;
-  cost_difference_percent: string;
-  freight_or_logistics_ease: string;
+  sourcing_node: string;
+  target_node: string;
+  rent_savings_per_sqft: string;
   estimated_profit_margin_boost: string;
-  strategic_advice: string;
+  confidence_score: number;
 }
 
 export interface RegionalArbitrageResult {
-  nodes: RegionalArbitrageNode[];
+  arbitrage_summary: ArbitrageSummary;
+  strategic_explanation: string;
   arbitrage_opportunities: ArbitrageOpportunity[];
-  recommended_setup_location: string;
-  recommended_sales_location: string;
 }
 
-export interface SkillGapItem {
-  skill: string;
-  importance: string;
-  current_status: string;
-  how_to_acquire: string;
+export interface FinancialAnalysisResult {
+  unit_metrics: {
+    revenue_per_unit: number;
+    cogs_per_unit: number;
+    gross_profit_per_unit: number;
+    gross_margin_percent: number;
+  };
+  monthly_totals: {
+    revenue: number;
+    cogs: number;
+    gross_profit: number;
+    fixed_operating_costs: number;
+    net_profit: number;
+    net_margin_percent: number;
+  };
+  break_even: {
+    units_required: number;
+    revenue_required: number;
+  };
+  unit_economics: {
+    cac: number;
+    ltv: number;
+    ltv_cac_ratio: number;
+  };
+  capital_runway: {
+    initial_capital: number;
+    monthly_burn: number;
+    runway_months: number;
+    annualized_roi_percent: number;
+  };
 }
 
-export interface FounderFeasibilityResult {
-  founder_readiness_score: number;
-  technical_match_percent: number;
-  business_match_percent: number;
-  financial_match_percent: number;
-  skill_gaps: SkillGapItem[];
-  worklife_advice: string;
-}
-
-export interface CostItem {
+export interface RiskItem {
   category: string;
-  estimated_cost: number;
-  frequency: string;
+  risk_level: string;
   description: string;
+  mitigation_strategy: string;
 }
 
-export interface CostEstimationResult {
-  total_initial_budget_required: number;
-  monthly_burn_rate: number;
-  cost_breakdown: CostItem[];
-  budget_gap: number;
-  unit_economics_summary: string;
-}
-
-export interface FundingOption {
-  method: string;
-  suitability_score: number;
-  why_suitable: string;
-  actionable_steps: string[];
-}
-
-export interface FundingAdvisorResult {
-  primary_recommendation: string;
-  bootstrap_feasible: boolean;
-  incubator_or_grant_opportunities: string[];
-  loan_advisability: string;
-  investor_timeline_recommendation: string;
-  options: FundingOption[];
-}
-
-export interface RoadmapMilestone {
-  month: number;
-  phase_name: string;
-  key_tasks: string[];
-  expected_output: string;
-  estimated_cost: number;
-}
-
-export interface ImplementationRoadmapResult {
-  total_months: number;
-  milestones: RoadmapMilestone[];
-  critical_path_warning: string;
+export interface RiskAssessmentResult {
+  overall_risk_level: string;
+  overall_risk_score: number;
+  risk_matrix: RiskItem[];
 }
 
 export interface PitchSlide {
@@ -156,23 +181,25 @@ export interface PitchSlide {
 }
 
 export interface InvestorReadinessResult {
-  investor_readiness_score: number;
-  deck_slides: PitchSlide[];
-  investor_qa_prep: Record<string, string>;
+  investment_thesis: string;
+  funding_ask: string;
+  use_of_funds_percent: Record<string, number>;
+  pitch_slides: PitchSlide[];
 }
 
 export interface UnifiedStartupReport {
-  timestamp: string;
   idea: string;
   overall_readiness_score: number;
+  final_decision: FinalDecisionResult;
   idea_validation: IdeaValidationResult;
   market_research: MarketResearchResult;
   competitor_analysis: CompetitorAnalysisResult;
+  customer_analysis: CustomerAnalysisResult;
   regional_arbitrage: RegionalArbitrageResult;
-  founder_feasibility: FounderFeasibilityResult;
-  cost_estimation: CostEstimationResult;
-  funding_advisor: FundingAdvisorResult;
-  roadmap: ImplementationRoadmapResult;
+  financial_analysis: FinancialAnalysisResult;
+  risk_assessment: RiskAssessmentResult;
   investor_readiness: InvestorReadinessResult;
-  live_data_timestamp: string;
+  cost_estimation?: any;
+  funding_advisor?: any;
+  roadmap?: any;
 }

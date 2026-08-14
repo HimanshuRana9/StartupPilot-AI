@@ -1,134 +1,196 @@
 "use client";
 
-import React from "react";
-import { MapPin, ArrowRight, Zap, TrendingUp, DollarSign, Building2, CheckCircle } from "lucide-react";
+import React, { useState } from "react";
+import { 
+  MapPin, Sparkles, TrendingUp, ShieldCheck, ArrowRight, 
+  Building2, Zap, Users, ShieldAlert, CheckCircle2, Clock 
+} from "lucide-react";
 import { RegionalArbitrageResult } from "../types";
 
 interface ArbitrageCardProps {
   arbitrage: RegionalArbitrageResult;
+  onCompareLocations?: (sourceCity: string, targetCity: string) => void;
 }
 
-export const ArbitrageCard: React.FC<ArbitrageCardProps> = ({ arbitrage }) => {
+export const ArbitrageCard: React.FC<ArbitrageCardProps> = ({
+  arbitrage,
+  onCompareLocations,
+}) => {
+  const summary = arbitrage.arbitrage_summary;
+  const [selectedSource, setSelectedSource] = useState(summary.source_city || "Greater Noida");
+  const [selectedTarget, setSelectedTarget] = useState(summary.target_city || "Delhi");
+
+  const cityOptions = [
+    "Greater Noida", "Noida", "Hosur", "Nashik", "Sriperumbudur", 
+    "Delhi", "Bengaluru", "Mumbai", "Pune", "Chennai", "Hyderabad"
+  ];
+
+  const handleCompareTrigger = () => {
+    if (onCompareLocations) {
+      onCompareLocations(selectedSource, selectedTarget);
+    }
+  };
+
   return (
-    <div className="glass-card-glow rounded-3xl p-6 border border-indigo-500/30 relative overflow-hidden">
+    <div className="p-6 rounded-3xl glass-card-glow border border-cyan-500/30 space-y-6">
       
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+      {/* Header Badge */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-bold uppercase tracking-wider">
-              Human-Brain Reasoning
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
-              Supply Chain Arbitrage
-            </span>
-          </div>
-          <h3 className="text-xl font-extrabold text-white flex items-center gap-2">
-            Regional Cost & Location Arbitrage Analysis
+          <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-1">
+            ⭐ Killer Feature: Deterministic Engine
+          </span>
+          <h3 className="text-xl font-black text-white flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-cyan-400" />
+            Regional Supply Chain & Price Arbitrage
           </h3>
-          <p className="text-xs text-slate-400">
-            Maximizing Profit Margins by Sourcing & Operating in Low-Cost Hubs
+          <p className="text-xs text-slate-300">
+            Real data comparison across commercial lease, electricity, labor, tax rebates & freight transit.
           </p>
         </div>
 
-        {/* Profit Boost Badge */}
-        {arbitrage.arbitrage_opportunities.length > 0 && (
-          <div className="px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border border-emerald-500/40 text-emerald-300 flex items-center gap-3">
-            <TrendingUp className="w-6 h-6 text-emerald-400 animate-bounce" />
-            <div>
-              <span className="text-[10px] text-emerald-200/80 uppercase font-semibold block">
-                NET PROFIT MARGIN BOOST
-              </span>
-              <span className="text-lg font-black text-white">
-                {arbitrage.arbitrage_opportunities[0].estimated_profit_margin_boost}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Nodes Comparison Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
-        
-        {/* Source Production Node */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-indigo-500/30 relative">
-          <div className="flex items-center justify-between mb-3">
-            <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-indigo-400" />
-              SOURCING / OPERATIONS NODE
-            </span>
-            <MapPin className="w-4 h-4 text-cyan-400" />
-          </div>
-
-          <h4 className="text-lg font-bold text-white mb-2">
-            {arbitrage.recommended_setup_location}
-          </h4>
-
-          <div className="space-y-2 text-xs text-slate-300">
-            <div className="flex justify-between py-1 border-b border-slate-800">
-              <span className="text-slate-400">Commercial Rent:</span>
-              <span className="font-semibold text-emerald-400">
-                {arbitrage.nodes[0]?.land_rent_level || "68% Cheaper than Metro"}
-              </span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-800">
-              <span className="text-slate-400">Labor Wages:</span>
-              <span className="font-semibold text-cyan-300">
-                {arbitrage.nodes[0]?.labor_cost_level || "Cost-Effective Regional Pool"}
-              </span>
-            </div>
-            <div className="flex justify-between py-1">
-              <span className="text-slate-400">MSME Subsidy Status:</span>
-              <span className="font-semibold text-indigo-300">Active State Industrial Rebates</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Target Sales Node */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-purple-500/30 relative">
-          <div className="flex items-center justify-between mb-3">
-            <span className="px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 font-bold text-xs flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5 text-purple-400" />
-              HIGH-DEMAND CONSUMER MARKET
-            </span>
-            <MapPin className="w-4 h-4 text-purple-400" />
-          </div>
-
-          <h4 className="text-lg font-bold text-white mb-2">
-            {arbitrage.recommended_sales_location}
-          </h4>
-
-          <div className="space-y-2 text-xs text-slate-300">
-            <div className="flex justify-between py-1 border-b border-slate-800">
-              <span className="text-slate-400">Customer Purchasing Power:</span>
-              <span className="font-semibold text-purple-300">High Tier-1 / Metro Density</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-800">
-              <span className="text-slate-400">Retail Selling Price Point:</span>
-              <span className="font-semibold text-white">Full Value Premium Pricing</span>
-            </div>
-            <div className="flex justify-between py-1">
-              <span className="text-slate-400">Transit Logistics:</span>
-              <span className="font-semibold text-cyan-300">Direct Express Corridor (30-45 min)</span>
-            </div>
-          </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-extrabold flex items-center gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5" />
+            Margin Boost: {summary.estimated_profit_margin_boost}
+          </span>
+          <span className="px-3 py-1.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-bold">
+            Confidence: {summary.confidence_score}%
+          </span>
         </div>
       </div>
 
-      {/* Strategic Advice Highlight */}
-      {arbitrage.arbitrage_opportunities.length > 0 && (
-        <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 flex items-start gap-3">
-          <Zap className="w-5 h-5 text-amber-300 shrink-0 mt-0.5" />
-          <div>
-            <h5 className="font-bold text-xs text-indigo-200 uppercase tracking-wide mb-1">
-              Human-Brain Arbitrage Strategy:
-            </h5>
-            <p className="text-xs text-slate-200 leading-relaxed">
-              {arbitrage.arbitrage_opportunities[0].strategic_advice}
-            </p>
+      {/* Interactive Location Selector */}
+      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-slate-400 font-semibold">Sourcing Hub:</span>
+          <select
+            value={selectedSource}
+            onChange={(e) => setSelectedSource(e.target.value)}
+            className="py-1.5 px-3 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-cyan-400"
+          >
+            {cityOptions.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+
+        <ArrowRight className="w-4 h-4 text-cyan-400 hidden sm:block" />
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-slate-400 font-semibold">Target Consumer City:</span>
+          <select
+            value={selectedTarget}
+            onChange={(e) => setSelectedTarget(e.target.value)}
+            className="py-1.5 px-3 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-cyan-400"
+          >
+            {cityOptions.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          onClick={handleCompareTrigger}
+          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-all shadow-md shrink-0"
+        >
+          Recalculate Arbitrage
+        </button>
+      </div>
+
+      {/* Cost Breakdown Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead>
+            <tr className="border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
+              <th className="py-2.5 px-3">Cost Component</th>
+              <th className="py-2.5 px-3 text-cyan-300">{summary.source_city} (Sourcing Node)</th>
+              <th className="py-2.5 px-3 text-purple-300">{summary.target_city} (Sales Metro)</th>
+              <th className="py-2.5 px-3 text-right">Net Advantage</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800/60 text-slate-300">
+            <tr>
+              <td className="py-2.5 px-3 font-semibold text-white">Industrial Lease / Unit</td>
+              <td className="py-2.5 px-3">₹{summary.source_costs.manufacturing.toFixed(2)}</td>
+              <td className="py-2.5 px-3">₹{summary.target_costs.manufacturing.toFixed(2)}</td>
+              <td className="py-2.5 px-3 text-right font-bold text-emerald-400">
+                -₹{(summary.target_costs.manufacturing - summary.source_costs.manufacturing).toFixed(2)}
+              </td>
+            </tr>
+
+            <tr>
+              <td className="py-2.5 px-3 font-semibold text-white">Warehouse Logistics Lease</td>
+              <td className="py-2.5 px-3">₹{summary.source_costs.warehouse.toFixed(2)}</td>
+              <td className="py-2.5 px-3">₹{summary.target_costs.warehouse.toFixed(2)}</td>
+              <td className="py-2.5 px-3 text-right font-bold text-emerald-400">
+                -₹{(summary.target_costs.warehouse - summary.source_costs.warehouse).toFixed(2)}
+              </td>
+            </tr>
+
+            <tr>
+              <td className="py-2.5 px-3 font-semibold text-white">Electricity Power Tariff</td>
+              <td className="py-2.5 px-3">₹{summary.source_costs.electricity.toFixed(2)}</td>
+              <td className="py-2.5 px-3">₹{summary.target_costs.electricity.toFixed(2)}</td>
+              <td className="py-2.5 px-3 text-right font-bold text-emerald-400">
+                -₹{(summary.target_costs.electricity - summary.source_costs.electricity).toFixed(2)}
+              </td>
+            </tr>
+
+            <tr>
+              <td className="py-2.5 px-3 font-semibold text-white">Labor Hourly Rate / Unit</td>
+              <td className="py-2.5 px-3">₹{summary.source_costs.labor.toFixed(2)}</td>
+              <td className="py-2.5 px-3">₹{summary.target_costs.labor.toFixed(2)}</td>
+              <td className="py-2.5 px-3 text-right font-bold text-emerald-400">
+                -₹{(summary.target_costs.labor - summary.source_costs.labor).toFixed(2)}
+              </td>
+            </tr>
+
+            <tr>
+              <td className="py-2.5 px-3 font-semibold text-white">Freight Transit ({summary.distance_km} km)</td>
+              <td className="py-2.5 px-3 text-amber-300">+₹{summary.source_costs.logistics_freight.toFixed(2)}</td>
+              <td className="py-2.5 px-3 text-slate-500">₹0.00</td>
+              <td className="py-2.5 px-3 text-right font-semibold text-amber-300">
+                +₹{summary.source_costs.logistics_freight.toFixed(2)} freight
+              </td>
+            </tr>
+
+            <tr className="bg-indigo-950/40 font-bold border-t-2 border-indigo-500/40">
+              <td className="py-3 px-3 text-white">TOTAL COST PER UNIT</td>
+              <td className="py-3 px-3 text-cyan-300 text-sm">₹{summary.source_costs.total_per_unit.toFixed(2)}</td>
+              <td className="py-3 px-3 text-purple-300 text-sm">₹{summary.target_costs.total_per_unit.toFixed(2)}</td>
+              <td className="py-3 px-3 text-right text-emerald-400 text-sm">
+                Save ₹{summary.savings_per_unit.toFixed(2)} / unit ({summary.savings_percent}%)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* AI Strategic Synthesis & Evidence Sources */}
+      <div className="space-y-3">
+        <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 text-xs text-indigo-200">
+          <span className="text-cyan-300 font-bold uppercase mr-1.5">Strategic AI Reasoning:</span>
+          {arbitrage.strategic_explanation}
+        </div>
+
+        {/* Evidence Tracking Badges */}
+        <div className="pt-2 border-t border-slate-800">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
+            Verified Evidence & Data Citations:
+          </span>
+          <div className="flex flex-wrap gap-2 text-[11px]">
+            {summary.evidence.map((ev, idx) => (
+              <div key={idx} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{ev.source}</span>
+                <span className="text-slate-500">• {ev.timestamp}</span>
+              </div>
+            ))}
           </div>
         </div>
-      )}
+      </div>
+
     </div>
   );
 };

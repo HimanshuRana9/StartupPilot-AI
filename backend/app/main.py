@@ -1,23 +1,21 @@
 import os
+import io
+from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
-from app.config import settings
-from app.models.schemas import (
-    StartupAnalysisRequest, 
-    UnifiedStartupReport, 
-    VoiceCommandRequest, 
-    VoiceCommandResponse
-)
+from pydantic import BaseModel
+
 from app.agents.orchestrator import orchestrator
+from app.tools.arbitrage_engine import arbitrage_engine
 from app.tools.export_engine import generate_pdf_report, generate_pptx_pitch_deck
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    description="Autonomous Multi-Agent Startup Mentor & Regional Arbitrage Intelligence Platform"
+    title="StartupPilot AI API",
+    description="Evidence-driven Multi-Agent Startup Feasibility & Regional Arbitrage Platform",
+    version="2.0.0"
 )
 
-# CORS middleware for Next.js frontend communication
+# Enable CORS for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,93 +24,103 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class AnalyzeRequest(BaseModel):
+    idea: str
+    source_city: Optional[str] = "Greater Noida"
+    target_city: Optional[str] = "Delhi"
+    founder: Optional[Dict[str, Any]] = None
+
+class ArbitrageCompareRequest(BaseModel):
+    source_city: str
+    target_city: str
+    monthly_volume: Optional[float] = 2000.0
+
+class VoiceCommandRequest(BaseModel):
+    command: str
+
 @app.get("/")
 def read_root():
     return {
         "status": "online",
-        "app": settings.PROJECT_NAME,
-        "version": settings.VERSION,
-        "features": [
-            "Multi-Agent Execution Pipeline",
-            "Human-Level Regional Supply Chain & Price Arbitrage",
-            "Live Real-World Market News Integration",
-            "Native Voice Assistant Controls",
-            "Automated PDF Report & PowerPoint Deck Generator"
-        ]
+        "service": "StartupPilot AI Multi-Agent Intelligence Engine",
+        "version": "2.0.0",
+        "agents_active": 11
     }
 
-@app.post("/api/analyze", response_model=UnifiedStartupReport)
-def analyze_startup(request: StartupAnalysisRequest):
-    """
-    Runs the 8-agent unified pipeline to generate an end-to-end business evaluation.
-    """
-    if not request.idea or len(request.idea.strip()) < 3:
-        raise HTTPException(status_code=400, detail="Please provide a valid startup idea prompt.")
-        
+@app.post("/api/analyze")
+def analyze_startup(req: AnalyzeRequest):
+    """Executes the full 11-agent business intelligence & regional arbitrage pipeline."""
+    if not req.idea.strip():
+        raise HTTPException(status_code=400, detail="Idea prompt cannot be empty.")
+    
     try:
-        report = orchestrator.run_full_pipeline(request)
+        report = orchestrator.run_pipeline(
+            idea=req.idea,
+            source_city=req.source_city or "Greater Noida",
+            target_city=req.target_city or "Delhi"
+        )
         return report
     except Exception as e:
-        print(f"[API Error] Pipeline failure: {e}")
-        raise HTTPException(status_code=500, detail=f"Analysis pipeline error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error executing agent pipeline: {str(e)}")
 
-@app.post("/api/voice-command", response_model=VoiceCommandResponse)
-def handle_voice_command(cmd_req: VoiceCommandRequest):
-    """
-    Handles natural spoken voice commands from the frontend Voice Assistant.
-    """
-    command_text = cmd_req.command.lower().strip()
+@app.post("/api/arbitrage/compare")
+def compare_locations(req: ArbitrageCompareRequest):
+    """Compares supply chain, manufacturing, warehouse, and logistics costs between two cities."""
+    try:
+        result = arbitrage_engine.compare_locations(
+            source_city=req.source_city,
+            target_city=req.target_city,
+            monthly_volume=req.monthly_volume or 2000.0
+        )
+        return {"status": "success", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error comparing locations: {str(e)}")
+
+@app.post("/api/voice-command")
+@app.post("/api/voice")
+def process_voice_command(req: VoiceCommandRequest):
+    """Processes interactive voice commands and returns spoken audio text & action intent."""
+    cmd = req.command.lower().strip()
     
-    if "analyze" in command_text or "evaluate" in command_text or "start" in command_text:
-        return VoiceCommandResponse(
-            spoken_reply=f"Understood! Launching our 8 specialized AI agents to analyze your startup idea: '{cmd_req.command}'. Please review the generated dashboard.",
-            action_type="ANALYZE",
-            payload={"idea": cmd_req.command}
+    if "compare" in cmd or "noida" in cmd or "mumbai" in cmd or "bengaluru" in cmd:
+        res = arbitrage_engine.compare_locations("Greater Noida", "Delhi")
+        reply = (
+            f"Comparing Greater Noida and Delhi. Sourcing in Greater Noida costs ₹{res['source_costs']['total_per_unit']:.2f} "
+            f"per unit, compared to ₹{res['target_costs']['total_per_unit']:.2f} in Delhi, yielding a "
+            f"₹{res['savings_per_unit']:.2f} unit cost advantage."
         )
-    elif "arbitrage" in command_text or "noida" in command_text or "delhi" in command_text or "location" in command_text:
-        return VoiceCommandResponse(
-            spoken_reply="Operating out of Noida or regional industrial hubs yields up to 68% lower commercial rent and 26% power savings compared to Delhi, significantly boosting net profit margins.",
-            action_type="EXPLAIN_ARBITRAGE"
-        )
-    elif "pitch" in command_text or "deck" in command_text or "presentation" in command_text:
-        return VoiceCommandResponse(
-            spoken_reply="Your 8-slide investor pitch deck has been compiled. You can download the formatted PowerPoint presentation and PDF report directly using the buttons below.",
-            action_type="GENERATE_DECK"
-        )
+        return {"spoken_reply": reply, "action_type": "ARBITRAGE", "data": res}
+    
+    elif "pitch" in cmd or "deck" in cmd or "presentation" in cmd:
+        reply = "Preparing your 8-slide investor pitch deck with financial projections and market size metrics."
+        return {"spoken_reply": reply, "action_type": "PITCH_DECK"}
+    
     else:
-        return VoiceCommandResponse(
-            spoken_reply=f"I have received your query: '{cmd_req.command}'. I am ready to evaluate your startup, calculate regional price arbitrage, or compile your investor pitch deck.",
-            action_type="GENERAL_QA"
-        )
+        reply = f"Analyzing your startup idea: '{req.command}'. Triggering 11 specialized agents now."
+        return {"spoken_reply": reply, "action_type": "ANALYZE"}
 
 @app.post("/api/export/pdf")
-def export_pdf(report: UnifiedStartupReport):
-    """
-    Generates and returns a downloadable PDF report.
-    """
+def export_pdf(report: Dict[str, Any]):
+    """Generates an executive PDF report."""
     try:
         pdf_bytes = generate_pdf_report(report)
-        filename = f"StartupPilot_Report_{report.idea[:15].replace(' ', '_')}.pdf"
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
+            headers={"Content-Disposition": "attachment; filename=StartupPilot_Report.pdf"}
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PDF generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"PDF Export Error: {str(e)}")
 
 @app.post("/api/export/pptx")
-def export_pptx(report: UnifiedStartupReport):
-    """
-    Generates and returns a downloadable PowerPoint (.pptx) pitch deck presentation.
-    """
+def export_pptx(report: Dict[str, Any]):
+    """Generates an 8-slide PowerPoint investor presentation."""
     try:
         pptx_bytes = generate_pptx_pitch_deck(report)
-        filename = f"StartupPilot_PitchDeck_{report.idea[:15].replace(' ', '_')}.pptx"
         return Response(
             content=pptx_bytes,
             media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
+            headers={"Content-Disposition": "attachment; filename=StartupPilot_PitchDeck.pptx"}
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PowerPoint generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"PPTX Export Error: {str(e)}")
